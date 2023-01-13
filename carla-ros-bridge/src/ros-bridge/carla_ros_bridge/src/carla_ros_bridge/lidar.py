@@ -87,17 +87,17 @@ class Lidar(Sensor):
             lidar_data, (int(lidar_data.shape[0] / 4), 4))
             
         # add the ring and time field values
-        delta = 1 / self.rotation_frequency
-        thisStepTime = 0
+#         delta = 1 / self.rotation_frequency
+#         thisStepTime = 0
 
         ring = None
         time = None
         
         for i in range(self.channels):
             current_ring_points_count = carla_lidar_measurement.get_point_count(i)
-            time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), thisStepTime)))
             ring = numpy.vstack((ring, numpy.full((current_ring_points_count, 1), i)))
-            thisStepTime += delta
+            time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), timestamp=carla_lidar_measurement.timestamp)))
+#             thisStepTime += delta
 
         ring = numpy.delete(ring, 0, axis=0)
         lidar_data = numpy.hstack((lidar_data, ring))
