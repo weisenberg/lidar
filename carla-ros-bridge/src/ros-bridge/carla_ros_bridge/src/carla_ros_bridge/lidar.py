@@ -110,7 +110,7 @@ class Lidar(Sensor):
             channelCounter += 1
             if not channelCounter % 32:
                 ini_time += delta
-            time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), ini_time)))
+            time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), ini_time-carla_lidar_measurement.timestamp)))
 
 
         ring = numpy.delete(ring, 0, axis=0)
