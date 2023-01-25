@@ -93,7 +93,6 @@ class Lidar(Sensor):
         # how big the difference between each slice of the scan is
         slicesPerRotation = points_per_second / (rotation_frequency * channels)
         delta = (10e9 / self.rotation_frequency) / slicesPerRotation #nanoseconds
-        ini_time = carla_lidar_measurement.timestamp
         
         # add the ring and time field values
         ring = None
@@ -107,11 +106,11 @@ class Lidar(Sensor):
             current_ring_points_count = carla_lidar_measurement.get_point_count(i)
             ring = numpy.vstack((ring, numpy.full((current_ring_points_count, 1), i)))
             
-            channelCounter += 1
-            if not channelCounter % 32:
+            ini_time = carla_lidar_measurement.timestamp
+            
+            for j in range(current_ring_points_count):
+                time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), ini_time-carla_lidar_measurement.timestamp)))
                 ini_time += delta
-            time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), ini_time-carla_lidar_measurement.timestamp)))
-
 
         ring = numpy.delete(ring, 0, axis=0)
         lidar_data = numpy.hstack((lidar_data, ring))
