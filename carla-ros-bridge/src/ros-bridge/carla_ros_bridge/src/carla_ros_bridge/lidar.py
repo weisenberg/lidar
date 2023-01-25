@@ -99,8 +99,6 @@ class Lidar(Sensor):
         time = None
         # time for each msg in pointcloud is the actual time minus the timestamp in the header (ts-scan_ts)
         
-        #slice after slice
-        channelCounter = 1
         
         for i in range(self.channels):
             current_ring_points_count = carla_lidar_measurement.get_point_count(i)
