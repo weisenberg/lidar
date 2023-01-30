@@ -108,7 +108,7 @@ class Lidar(Sensor):
             
             for point in range(current_ring_points_count):
                 time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), ini_time-carla_lidar_measurement.timestamp)))
-                ini_tpime += delta
+                ini_time += delta
 
         ring = numpy.delete(ring, 0, axis=0)
         lidar_data = numpy.hstack((lidar_data, ring))
