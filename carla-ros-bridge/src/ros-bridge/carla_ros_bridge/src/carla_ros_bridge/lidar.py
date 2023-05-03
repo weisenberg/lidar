@@ -12,7 +12,6 @@ Classes to handle Carla lidars
 """
 
 import numpy
-
 from carla_ros_bridge.sensor import Sensor, create_cloud
 
 from sensor_msgs.msg import PointCloud2, PointField
@@ -91,27 +90,37 @@ class Lidar(Sensor):
             lidar_data, (int(lidar_data.shape[0] / 4), 4))
           
         # how big the difference between each slice of the scan is
-        slicesPerRotation = self.points_per_second / (self.rotation_frequency * self.channels)
-        delta = (10e9 / self.rotation_frequency) / slicesPerRotation #nanoseconds
+        time_range = 1 / self.rotation_frequency
+        # slicesPerRotation = self.points_per_second / (self.rotation_frequency * self.channels)
+        # delta = (1 / self.rotation_frequency) / slicesPerRotation #nanoseconds
         
         # add the ring and time field values
+        timestamp=carla_lidar_measurement.timestamp
         ring = None
         time = None
         # time for each msg in pointcloud is the actual time minus the timestamp in the header (ts-scan_ts)
         
-        
+
         for i in range(self.channels):
+            pointTimeValue = 0
             current_ring_points_count = carla_lidar_measurement.get_point_count(i)
+            if current_ring_points_count == 0:
+                continue
+            delta = time_range / current_ring_points_count
             ring = numpy.vstack((ring, numpy.full((current_ring_points_count, 1), i)))
-            
-            ini_time = carla_lidar_measurement.timestamp
-            
-            for point in range(current_ring_points_count):
-                time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), ini_time-carla_lidar_measurement.timestamp)))
-                ini_time += delta
+            time = numpy.vstack((time, numpy.full((current_ring_points_count, 1), 0)))
+
+            # for point in range(current_ring_points_count):
+            #     # print(i, point, timestamp, pointTimeValue)
+            #     time = numpy.vstack((time, numpy.full((1, 1), pointTimeValue)))
+            #     # print(point, " time range: ", time_range, "time: ", pointTimeValue)
+            #     pointTimeValue += delta
+            #     pointTimeValue  = pointTimeValue / 1000 #convert nano to micro seconds
+        
 
         ring = numpy.delete(ring, 0, axis=0)
         lidar_data = numpy.hstack((lidar_data, ring))
+
         time = numpy.delete(time, 0, axis=0)
         lidar_data = numpy.hstack((lidar_data, time))
 
